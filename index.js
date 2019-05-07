@@ -1,9 +1,10 @@
+require('dotenv').config()
 var express = require('express')
 var app = express()
 var cors = require('cors')
 var bodyParser = require('body-parser')
 const axios = require('axios');
-require('dotenv').config()
+
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -16,7 +17,7 @@ var config = {
     databaseHost : process.env.databaseHost ? process.env.databaseHost : "127.0.0.1",
     databaseUsername : process.env.databaseUsername ? process.env.databaseUsername : "root",
     databasePwd : process.env.databasePwd ? process.env.databasePwd : "password",
-
+    port  : process.env.port ? process.env.port : 8080
 }
 
 function initDb(){
@@ -111,13 +112,20 @@ app.patch('/orders/:id', function (req, res) {
     let sql = 'UPDATE `order` SET status = ? , updateDate = ?  WHERE id = ? and status = ? '
 
     dbconnecttion.query('SELECT id from `order` where id = ?' , [id] , function (error, results) {
-        if( results[0] &&  results[0].id){
+        if(error){
+            dbconnecttion.end();
+            return res.status(500).send({status: "DB_ERROR"})
+        }
+
+        if( results && results[0] &&  results[0].id){
             dbconnecttion.query(sql, [1, CURRENT_TIMESTAMP , id , 0] ,  function (error, results) {
+                dbconnecttion.end();
+                if(error){
+                    return res.status(500).send({status: "DB_ERROR"})
+                }
                 console.log('results' , results);
                 let status = results.changedRows > 0 ? 'SUCCESS' : "TAKEN"
                 let code = results.changedRows > 0 ? 200 : 400
-
-                dbconnecttion.end();
                 return res.status(code).send({status})
             })
         }else{
@@ -127,4 +135,40 @@ app.patch('/orders/:id', function (req, res) {
     })
 })
 
-app.listen(8080);
+
+function checkInt(param){
+    return new RegExp('^[0-9]+$').test(param)
+}
+
+app.get('/orders', function (req, res) {
+
+    const {page , limit} = req.query
+    if(!checkInt(page) || !checkInt(limit)){
+        return res.status(400).send({error : "PARAM_MUST_BE_INT"})
+    }
+
+    var dbconnecttion = initDb()
+    dbconnecttion.query('Select count(*) as `TotalCount` from `order` ' , function (error, results) {
+
+        if(error){
+            dbconnecttion.end();
+            return res.status(500).send({status: "DB_ERROR"})
+        }
+
+        if( results && results[0] && results[0].TotalCount){
+            dbconnecttion.query('Select * from `order` limit ? OFFSET ?', [parseInt(limit) , parseInt(page)] ,  function (error, results) {
+                // dbconnecttion.end();
+                console.log('results' ,results);
+                if(error){
+                    return res.status(500).send({status: "DB_ERROR"})
+                }
+                return res.status(200).send(results)
+            })
+        }else{
+           dbconnecttion.end();
+          return res.status(404).send({status: "NO_RECORD"})
+        }
+    })
+})
+
+app.listen(config.port);
