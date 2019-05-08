@@ -1,10 +1,28 @@
-version: '3'
+version: '3.3'
 services:
   api:
     build: .
+    restart: always
+    container_name: findawayAPI
     ports:
-     - "8080:8080"
-    volumes:
-     - .:/code
-  # mysql:
-  #   image: "redis:alpine"
+      - "8080:8080"
+    expose:
+      - '3306'
+
+  db:
+    build: ./db
+    restart: always
+    container_name: findawayMySQL
+    environment:
+      MYSQL_DATABASE: 'findaway'
+      MYSQL_ROOT_PASSWORD: 'rootpass'
+      MYSQL_USER: 'dbuser'
+      MYSQL_PASSWORD: 'userpass'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+
+# Names our volume
+volumes:
+  db_data: 
