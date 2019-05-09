@@ -14,19 +14,21 @@ app.use(bodyParser.urlencoded({ extended: true }))
 var config = {
     google_key : process.env.google_key ? process.env.google_key : "",
     database : process.env.database ? process.env.database : "findaway",
-    databaseHost : process.env.databaseHost ? process.env.databaseHost : "127.0.0.1",
-    databaseUsername : process.env.databaseUsername ? process.env.databaseUsername : "root",
-    databasePwd : process.env.databasePwd ? process.env.databasePwd : "password",
+    db_port : process.env.db_port ? process.env.db_port : "3306",
+    db_url : process.env.db_url ? process.env.db_url : "127.0.0.1",
+    db_user : process.env.db_user ? process.env.db_user : "root",
+    db_user_pwd : process.env.db_user_pwd ? process.env.db_user_pwd : "password",
     port  : process.env.port ? process.env.port : 8080
 }
 
 function initDb(){
     var mysql = require('mysql');
-    return mysql.createConnection({
-      host: config.databaseHost,
+    return mysql.createPool({
+      host: config.db_url,
+      port: config.db_port,
       database: config.database,
-      user: config.databaseUsername,
-      password: config.databasePwd,
+      user: config.db_user,
+      password: config.db_user_pwd,
     });
 }
 

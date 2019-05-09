@@ -1,14 +1,5 @@
 version: '3.3'
 services:
-  api:
-    build: .
-    restart: always
-    container_name: findawayAPI
-    ports:
-      - "8080:8080"
-    expose:
-      - '3306'
-
   db:
     build: ./db
     restart: always
@@ -22,6 +13,19 @@ services:
       - '3306:3306'
     expose:
       - '3306'
+
+  api:
+    build: .
+    restart: always
+    container_name: findawayAPI
+    links:
+      - db
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    expose:
+      - '3000'
 
 # Names our volume
 volumes:
