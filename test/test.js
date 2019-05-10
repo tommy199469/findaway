@@ -7,7 +7,7 @@ var expect = chai.expect();
 chai.use(chaiHttp);
 
 var api_host = "127.0.0.1:3000"
-var order_id = 2
+var order_id = 1
 describe('Test findaway api', function () {
 
     it('testing for create order , expect success ', function (done) {
