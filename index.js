@@ -125,7 +125,6 @@ app.patch('/orders/:id', function (req, res) {
                 if(error){
                     return res.status(500).send({status: "DB_ERROR"})
                 }
-                console.log('results' , results);
                 let status = results.changedRows > 0 ? 'SUCCESS' : "TAKEN"
                 let code = results.changedRows > 0 ? 200 : 400
                 return res.status(code).send({status})
@@ -158,7 +157,7 @@ app.get('/orders', function (req, res) {
         }
 
         if( results && results[0] && results[0].TotalCount){
-            dbconnecttion.query('Select * from `order` limit ? OFFSET ?', [parseInt(limit) , parseInt(page)] ,  function (error, results) {
+            dbconnecttion.query('Select * from `order` limit ? OFFSET ?', [parseInt(limit) , parseInt(page) * parseInt(limit)] ,  function (error, results) {
                 // dbconnecttion.end();
                 console.log('results' ,results);
                 if(error){
