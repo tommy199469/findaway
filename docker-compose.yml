@@ -3,29 +3,33 @@ services:
   db:
     build: ./db
     restart: always
-    container_name: findawayMySQL
+    container_name: $db_url
     environment:
-      MYSQL_DATABASE: 'findaway'
-      MYSQL_ROOT_PASSWORD: 'rootpass'
-      MYSQL_USER: 'dbuser'
-      MYSQL_PASSWORD: 'userpass'
+      MYSQL_DATABASE: $database
+      MYSQL_ROOT_PASSWORD: $root_pwd
+      MYSQL_USER: $db_user
+      MYSQL_PASSWORD: $db_user_pwd
     ports:
-      - '3306:3306'
+      - $db_ports
     expose:
-      - '3306'
+      - $db_port
+    env_file:
+      - .env
 
   api:
     build: .
     restart: always
     container_name: findawayAPI
+    env_file:
+      - .env
     links:
       - db
     depends_on:
       - db
     ports:
-      - "3000:3000"
+      - $ports
     expose:
-      - '3000'
+      - $port
 
 # Names our volume
 volumes:
